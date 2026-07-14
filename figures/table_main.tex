@@ -1,0 +1,21 @@
+\begin{table}[t]\centering\caption{Beam-prediction robustness (ASU 3.5\,GHz, $N{=}64$, 64-beam DFT codebook). Top-1 accuracy / spectral-efficiency ratio. The realistic equal-power ($0$\,dB) operating point is the headline (bold); the $+6$\,dB row is an adversary-optimistic worst case (NLoS-shadowed direct link).}\label{tab:main}
+\begin{tabular}{lcc}\toprule
+Scenario & Top-1 acc. & SE ratio\\\midrule
+\emph{Clean baseline} & 90.1\% & 97.5\%\\\midrule
+\emph{Feature-space baselines (unrealizable)}\\
+\quad White-box FGSM ($\epsilon{=}0.1$) & 1.5\% & 38.0\%\\
+\quad White-box PGD ($\epsilon{=}0.1$) & 0.0\% & 30.5\%\\
+\quad White-box C\&W ($c{=}1$) & 1.7\% & 41.4\%\\\midrule
+\emph{Malicious RIS (realizable)}\\
+\quad \textbf{equal-power ($0$\,dB, $M{=}64$)} & \textbf{39.0\%} & \textbf{70.2\%}\\
+\quad $+6$\,dB worst case ($M{=}128$) & 3.7\% & 18.8\%\\
+\quad 1-bit phases ($M{=}128$) & 30.9\% & 72.3\%\\
+\quad attacker CSI @ $5$\,dB est. & 3.7\% & 23.8\%\\
+\quad attacker CSI @ $0$\,dB est. & 27.2\% & 64.6\%\\
+\quad CNN victim ($M{=}128$) & 19.6$\pm$1.1\% & 39.3\%\\
+\quad SNR-jamming (model-blind) & 89.9\% & 97.4\%\\\midrule
+\emph{Defenses}\\
+\quad RIS-adv.\ training, no attack & 91.0\% & 97.9\%\\
+\quad RIS-adv.\ training, $M{=}128$ attack & 58.4$\pm$0.1\% & 87.8\%\\
+\quad Detector AUC (clean vs.\ malicious) & \multicolumn{2}{c}{0.998}\\\bottomrule
+\end{tabular}\end{table}

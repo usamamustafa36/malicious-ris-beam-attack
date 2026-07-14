@@ -1,0 +1,17 @@
+# large regenerable data caches (DeepMIMO channels + scenarios)
+*.npy
+deepmimo_scenarios/
+*_downloaded.zip
+
+# python / build artifacts
+__pycache__/
+*.pyc
+*.log
+*.aux
+*.out
+
+# packaged archive
+ris_malicious_code.zip
+
+# paper source (LaTeX + PDF); not part of the code release
+paper/

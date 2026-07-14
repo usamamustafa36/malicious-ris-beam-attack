@@ -1,0 +1,19 @@
+{
+  "note": "single-user (batch=1) 80-step Adam wall-clock, CPU, median of 20 repeats; research code, not embedded/SDR-optimised.",
+  "M_sweep": {
+    "64": {
+      "median_s": 5.808692220991361,
+      "std_s": 0.6294970247020786
+    },
+    "128": {
+      "median_s": 4.846739171000081,
+      "std_s": 0.6699103578809604
+    }
+  },
+  "coherence_ms": {
+    "3.5GHz_pedestrian_1.5ms": 28.57142857142857,
+    "3.5GHz_vehicular_30ms": 1.4285714285714286,
+    "28GHz_pedestrian_1.5ms": 3.571428571428571,
+    "28GHz_vehicular_30ms": 0.17857142857142858
+  }
+}
