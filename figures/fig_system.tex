@@ -1,0 +1,30 @@
+% System and threat model (TikZ). Included by paper/main_tccn.tex.
+\begin{tikzpicture}[font=\footnotesize, >=latex,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=3pt, fill=white},
+  bad/.style={draw=red!70!black, very thick, fill=red!6, rounded corners=2pt, align=center, inner sep=3pt},
+  lab/.style={align=center, inner sep=1pt}]
+  % base station
+  \node[box, minimum width=1.3cm, minimum height=0.9cm] (bs) at (0,0) {BS\\$N$-ULA};
+  % UE
+  \node[box, minimum width=0.9cm] (ue) at (6.6,0) {UE};
+  % malicious RIS
+  \node[bad, minimum width=1.9cm, minimum height=0.55cm] (ris) at (3.3,1.75) {malicious RIS\\$M$ elements, $\mathbf v$};
+  % blockage
+  \draw[pattern=north east lines, pattern color=gray!70, draw=gray] (3.05,-0.35) rectangle (3.45,0.35);
+  \node[lab, gray] at (3.25,-0.55) {blockage $L_b$};
+  % paths
+  \draw[->, thick] (bs.east) -- node[above, pos=0.22] {$\mathbf h_d$} (ue.west);
+  \draw[->, thick, red!70!black] (bs.north east) -- node[left, pos=0.45] {$\mathbf a_{\mathrm{bR}}$} (ris.south west);
+  \draw[->, thick, red!70!black] (ris.south east) -- node[right, pos=0.55] {$\mathbf k_u$} (ue.north west);
+  % attacker knowledge
+  \node[lab, red!70!black] (csi) at (6.1,1.75) {overhears pilots\\(per-user CSI)};
+  \draw[->, dashed, red!70!black] (csi.west) -- (ris.east);
+  % beam-management pipeline below
+  \node[box] (meas) at (0,-1.6) {$L$ wide-beam\\RSRPs};
+  \node[box] (dnn) at (2.25,-1.6) {DNN $f_\theta$\\(beam predictor)};
+  \node[box] (ref) at (4.55,-1.6) {top-$k$ narrow\\refinement};
+  \node[box] (out) at (6.6,-1.6) {serving\\beam $\hat b$};
+  \draw[->] (meas) -- (dnn); \draw[->] (dnn) -- (ref); \draw[->] (ref) -- (out);
+  \draw[->, gray] (bs.south) -- (meas.north);
+  \node[lab, red!70!black] at (2.25,-2.35) {RIS phases are crafted to make $f_\theta$ mispredict};
+\end{tikzpicture}

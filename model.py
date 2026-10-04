@@ -1,8 +1,9 @@
 """Victim beam-prediction DNN (PyTorch) + shared train/eval helpers."""
-import numpy as np, torch, torch.nn as nn
+import os, numpy as np, torch, torch.nn as nn
 import beamdata as bd
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# BEAM_DEVICE=cpu forces CPU (e.g. when the GPU is occupied by another process)
+DEVICE = torch.device(os.environ.get("BEAM_DEVICE", "cuda" if torch.cuda.is_available() else "cpu"))
 
 
 class BeamMLP(nn.Module):

@@ -65,8 +65,54 @@ def _feats_torch(H):
 
 def _h_eff(g, theta):
     v = torch.exp(1j * theta)                               # (U,M) unit modulus
+    if "G" in g:                                            # general (rank>1) BS<-RIS channel
+        path = (g["k_u"].conj() * v) @ g["G"].T             # (U,N) = G diag(conj(a_out)) v
+        return g["H_d"] + g["scale"][:, None] * path
     c = (g["k_u"].conj() * v).sum(dim=1)                    # (U,) complex = k_u^H v
     return g["H_d"] + (g["scale"] * c)[:, None] * g["a_bsR"][None, :]
+
+
+def build_geometry_multipath(H_d, M, kappa, K_db, n_paths=8, seed=bd.SEED, ris_user_K_db=None):
+    """Rank-(P+1) BS<-RIS channel G (N x M): a K-factor-weighted LoS term plus P scattered
+    paths with random BS-side and RIS-side angles, normalized to ||G||_F^2 = M (the same
+    total power as the rank-one LoS model, whose G = a_bsR a_in^T). Unlike a rank-one
+    model, the reflected path can now point in up to P+1 BS-side directions, so the RIS
+    phases control a multi-dimensional perturbation. Optionally the RIS->user link is
+    also Rician (ris_user_K_db) with 4 scattered paths per user.
+    K_db = inf gives the rank-one LoS model; K_db = -inf a purely scattered link."""
+    rng = np.random.default_rng(seed)
+    U = H_d.shape[0]
+    hnorm = np.linalg.norm(H_d, axis=1)
+    u_out = rng.uniform(-1, 1, size=U)                       # drawn first: same users' angles as build_geometry
+    a_bs = lambda u: _steer(np.atleast_1d(u), N_ANT) / np.sqrt(N_ANT)
+    G_los = a_bs(U_BSR)[0][:, None] * _steer(np.array([U_BSR]), M)[0][None, :]
+    G_sc = np.zeros((N_ANT, M), complex)
+    for _ in range(n_paths):
+        gp = (rng.standard_normal() + 1j * rng.standard_normal()) / np.sqrt(2 * n_paths)
+        G_sc += gp * a_bs(rng.uniform(-1, 1))[0][:, None] * _steer(np.array([rng.uniform(-1, 1)]), M)[0][None, :]
+    if np.isinf(K_db):
+        G = G_los if K_db > 0 else G_sc
+    else:
+        K = 10 ** (K_db / 10)
+        G = np.sqrt(K / (K + 1)) * G_los + np.sqrt(1 / (K + 1)) * G_sc / (np.linalg.norm(G_sc) / np.sqrt(M))
+    G = G * np.sqrt(M) / np.linalg.norm(G)
+    a_out = _steer(u_out, M)                                 # (U, M) RIS->user (LoS)
+    if ris_user_K_db is not None:
+        K = 10 ** (ris_user_K_db / 10)
+        sc = np.zeros((U, M), complex)
+        for _ in range(4):
+            gp = (rng.standard_normal(U) + 1j * rng.standard_normal(U)) / np.sqrt(2 * 4)
+            sc += gp[:, None] * _steer(rng.uniform(-1, 1, size=U), M)
+        a_out = np.sqrt(K / (K + 1)) * a_out + np.sqrt(1 / (K + 1)) * sc
+    scale = (kappa * hnorm / M_REF).astype(np.float32)
+    return dict(
+        H_d=torch.as_tensor(H_d, dtype=torch.complex64, device=DEVICE),
+        G=torch.as_tensor(G, dtype=torch.complex64, device=DEVICE),
+        k_u=torch.as_tensor(a_out, dtype=torch.complex64, device=DEVICE),
+        scale=torch.as_tensor(scale, dtype=torch.float32, device=DEVICE),
+        W=torch.as_tensor(bd.dft_codebook(), dtype=torch.complex64, device=DEVICE),
+        M=M, rank=int(np.linalg.matrix_rank(G, tol=1e-6 * np.linalg.norm(G))),
+    )
 
 
 def ris_attack(model, g, iters=80, lr=0.1, bbit=None, seed=bd.SEED, return_theta=False):
@@ -134,11 +180,14 @@ def ris_snr_jam(g, iters=120, lr=0.1, seed=bd.SEED):
     theta = (torch.rand(U, M, device=DEVICE) * 2 * np.pi).requires_grad_(True)
     opt = torch.optim.Adam([theta], lr=lr)
     Wc = g["W"].conj()
+    hn2 = (g["H_d"].abs() ** 2).sum(1)
     for _ in range(iters):
         opt.zero_grad()
         H = _h_eff(g, theta)
         gains = (H @ Wc.T).abs() ** 2
-        loss = gains.max(dim=1).values.mean()               # minimise best achievable gain
+        # normalise per user by |h_d|^2: raw ray-traced gains (~1e-13) give gradients far
+        # below Adam's eps, which silently froze this optimiser in the conference version
+        loss = (gains.max(dim=1).values / hn2).mean()       # minimise best achievable gain
         loss.backward(); opt.step()
     return _h_eff(g, theta).detach().cpu().numpy()
 
