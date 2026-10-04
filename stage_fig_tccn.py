@@ -115,7 +115,7 @@ if have("stage_amortized_rsrp.json") and have("stage_amortized_csi.json"):
     AM = {k: load(f"stage_amortized_{k}.json") for k in ("rsrp", "csi")}
     fig, ax = fs.fig_wide_grid(1, 2, h=2.3)
     a = ax[0]; conds = [("clean", "no RIS", C["clean"]), ("random", "random RIS", C["rand"]),
-                        ("iterative", "iterative (seconds/user)", C["ris"]), ("gen_whitebox", "generator, white-box", C["se"]),
+                        ("iterative", "iterative (75 ms/user)", C["ris"]), ("gen_whitebox", "generator, white-box", C["se"]),
                         ("gen_blackbox", "generator, black-box", C["pgd"])]
     groups = [("rsrp", "64"), ("rsrp", "128"), ("csi", "64"), ("csi", "128")]
     w = 0.16

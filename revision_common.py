@@ -75,17 +75,17 @@ class Victim:
         return rsrp_torch(H, self.C_t) if self.kind == "rsrp" else ris._feats_torch(H)
 
 
-def train_victim(kind, d, seed, hidden=None, epochs=60, snr_db=bd.PILOT_SNR_DB, extra=None):
+def train_victim(kind, d, seed, hidden=None, epochs=60, snr_db=bd.PILOT_SNR_DB, extra=None, L=L_WIDE):
     """Train a victim on clean training channels plus optional extra channel sets
     (e.g. RIS-perturbed, for adversarial training), each labeled by its own best
-    beam; input noise at snr_db."""
+    beam; input noise at snr_db. L sets the number of wide beams of the rsrp victim."""
     rng = np.random.default_rng(seed)
     W = d["W"]
     lab = lambda H: np.abs(H.astype(np.complex128) @ W.conj().T).argmax(1)
     if kind == "rsrp":
-        C = wide_codebook()
+        C = wide_codebook(L)
         f = lambda H: rsrp_np(bd.add_cn_noise(H, snr_db, rng), C)
-        model = RSRPMLP(L_WIDE, d["n_beams"], hidden=hidden or (256, 256))
+        model = RSRPMLP(L, d["n_beams"], hidden=hidden or (256, 256))
     else:
         C = None
         f = lambda H: bd.complex_to_feat(bd.add_cn_noise(H, snr_db, rng))

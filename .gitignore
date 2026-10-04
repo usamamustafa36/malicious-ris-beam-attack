@@ -15,3 +15,6 @@ ris_malicious_code.zip
 
 # paper source (LaTeX + PDF); not part of the code release
 paper/
+
+# ray-traced RIS channels (377 MB; regenerate with rt_trace_ris.py)
+artifacts/rt_ris_channels*.npz
