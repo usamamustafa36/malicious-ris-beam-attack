@@ -1,57 +1,67 @@
-# Malicious-RIS Adversarial Attacks on DL Beam Prediction
+# Malicious RIS as Physical Adversaries of Learned Beam Management
 
-A **physically-realizable threat model** for adversarial attacks on 6G deep-learning
-beam prediction: a malicious reconfigurable intelligent surface (RIS). Everything runs
-on cached ray-traced DeepMIMO channels; PyTorch (GPU recommended).
+Code, trained models and results for the paper *"Malicious Reconfigurable Intelligent
+Surfaces as Physical Adversaries of Learned Beam Management"* (submitted to IEEE
+Transactions on Cognitive Communications and Networking).
 
-## The idea in one line
-A rogue RIS's unit-modulus phase shifts **are** the adversarial perturbation on the
-effective channel, so unlike feature-space FGSM/PGD it is physically realizable on RIS
-hardware, and its budget is the RIS aperture `M`.
+A malicious reconfigurable intelligent surface (RIS), which transmits nothing, chooses its
+phases so that a learned beam predictor selects a wrong narrow beam while the channel's
+capacity is preserved. The perturbation is restricted to what unit-modulus (and few-bit)
+reflection can produce. All results are simulations on ray-traced channels; no
+over-the-air experiment is claimed.
 
-## Pipeline (run in order, from this folder)
-| Stage | File | What it does |
-|------|------|--------------|
-| 1 | `beamdata.py`, `model.py`, `stage1_train.py` | Ray-traced CSI → DFT codebook → best-beam labels → victim DNN. Metrics: top-k + SE ratio. |
-| 2 | `attacks.py`, `stage2_attacks.py` | White-box FGSM/PGD/CW baselines (CW sign bug fixed), ε-sweep. |
-| 3 | `ris.py`, `stage3_ris.py` | **Malicious-RIS attack**: aperture sweep, random-RIS control, b-bit phases. |
-| 4 | `stage4_defense.py` | RIS-adversarial training (adaptive eval, 3-seed CI) + detector. |
-| 5 | `figstyle.py`, `stage5_figures.py`, `stage_extra_figures.py` | Publication figures (`figures/`). All figures share `figstyle.py` and are authored at true IEEE column width so on-page text is readable. `table_main.tex` is curated separately (merges rows from several stages) and is **not** auto-overwritten. |
-| 6 | `paper/main.tex` | IEEE conference paper (compiles with `pdflatex main.tex`). |
-| B | `stage_blackbox.py` | Black-box/transfer attack (surrogate model, no victim access). |
-| A | `stage_mmwave.py` | Validation on a genuine 28 GHz mmWave scenario (`city_0_newyork_28`). |
-| U | `stage_universal.py`, `stage_universal_fig.py` | Information-limited (universal / surrogate) attacker, the channel-aware boundary + its figure. |
-| R | `stage_review_response.py`, `stage_review_figs.py` | Additional experiments: link-budget/κ sweep, SNR-jamming baseline, detector FPR, beam-confusion, gradient-masking check, CSI-error sensitivity. |
-| CR | `stage_review_extra.py` | C&W sign-error substantiation (buggy 99.8% vs corrected 1.7% top-1) and the predicted-beam histogram behind the entropy result. |
-| G | `stage_cnn.py` | Architecture-generality check: trains a 1-D CNN victim (`BeamCNN` in `model.py`) and runs the same malicious-RIS attack (clean 84.2% to 19.6% at M=128, random-RIS control 83.5%). |
-| DA | `stage_detector_adaptive.py` | Detector-aware (adaptive) evasion attack (`ris.ris_attack_detector_aware`): adds the detector score to the RIS objective. Evading the detector (AUC 0.998 to 0.816) forces the attack to fail (victim top-1 back to 86.8%), so evasion and effectiveness are in tension. |
-| SN | `stage_snr_sweep.py` | Pilot-SNR sweep (0/10/20 dB): the collapse is not tied to one operating point (clean 76.4/90.1/91.3% to 4.6/3.7/1.3% under attack). |
-| F | `stage_fig_attacks.py` | Combined figure: feature-space baselines + black-box transfer in one two-panel plot. |
+## Setup
+Python 3.10+, PyTorch (GPU recommended; `BEAM_DEVICE=cpu` forces CPU), NumPy, SciPy,
+scikit-learn, matplotlib, and `DeepMIMO` (v4) for the ray-traced channels
+(`asu_campus_3p5`, `city_0_newyork_28`). Results are cached to `artifacts/*.json`,
+figures to `figures/`.
 
-```bash
-python3 stage1_train.py && python3 stage2_attacks.py && \
-python3 stage3_ris.py && python3 stage4_defense.py && python3 stage5_figures.py
-cd paper && pdflatex main.tex && pdflatex main.tex
-```
-Results cache to `artifacts/*.json`; figures to `figures/`.
-
-## Headline results (ASU 3.5 GHz, N=64, 64-beam DFT codebook)
-| Scenario | Top-1 | SE ratio |
+## Journal experiments (run from this folder)
+| Paper item | Script | What it does |
 |---|---|---|
-| Clean | 90.1% | 97.5% |
-| White-box PGD (ε=0.1, *unrealizable*) | 0.0% | 30.5% |
-| **Malicious RIS, equal-power 0 dB (M=64, headline)** | **39.0%** | **70.2%** |
-| Malicious RIS, +6 dB worst case (M=128) | 3.7% | 18.8% |
-| Malicious RIS, 1-bit phases (M=128) | 30.9% | 72.3% |
-| Random RIS (control) | ~90% | ~97% |
-| RIS-adversarial training, adaptive M=128 attack | 58.4±0.1% | 87.8% |
-| Detector AUC (clean vs RIS) | n/a | 0.998 |
-| **Black-box transfer** (surrogate, M=128, no victim access) | 7.9±0.8% | n/a |
-| **28 GHz mmWave** clean → malicious RIS (M=128) | 87.3% → 8.6% | 95.6% → 30.1% |
-| 28 GHz mmWave, RIS-adv. training under attack | 8.6% → 45.7% | n/a |
+| Table IV | `stage_ci.py` | Headline results, partial-measurement and full-CSI victims, 5 seeds x 5 noise draws, 95% CIs |
+| Fig. 2, Table V | `stage_tradeoff.py`, `stage_partial_L.py` | Overhead vs. SE trade-off and aperture sweep; number of wide beams L in {8, 16, 32} |
+| Fig. 3 | `stage_baselines_phy.py` | Model-blind RIS baselines (SNR jamming, beam-null, beam-hijack) and capacity ratio |
+| Fig. 4 | `stage_amortized.py`, `stage_latency_gen.py` | Amortized generator attack (white-/black-box), latency, stale attacker CSI |
+| Table VI | `stage_rsrp_generality.py` | Phase resolution, pilot SNR, 28 GHz, RIS-adversarial training |
+| Fig. 5 | `stage_multipath.py` | Rank-(P+1) multipath BS-RIS channels |
+| Table VII | `rt_trace_ris.py`, `stage_raytraced.py` | Fully ray-traced RIS (Sionna RT, Munich, with diffraction) at fixed and physical power ratios |
+| Table VIII | `stage_detector_rsrp.py` | Detector-aware attack on the partial-measurement victim, incl. one arms-race round |
+| Table III | `stage_linkbudget.py` | Link budgets behind the RIS-to-direct power ratios |
+| Figures/tables | `stage_fig_tccn.py` | Regenerates the journal figures and Table IV |
 
-## Honest limitations (stated in the paper)
-- RIS cascade uses a geometric model on top of ray-traced *direct* CSI (no ray-traced RIS scenario available).
-- **The attack is channel-aware** (needs the victim's CSI, as in the malicious-RIS literature). A *blind universal* RIS config is ineffective under i.i.d. user geometry, an honest negative result reported in the paper (`stage_universal.py`); sector-wide universal attacks under correlated geometry are future work.
+Shared code: `beamdata.py` (channels, codebook, metrics), `model.py` (victims),
+`ris.py` (RIS channel models and attacks), `revision_common.py` (victims for both
+settings, generic attack, noise-averaged evaluation, CIs).
 
-Extensions: **white-box model assumption removed** (black-box transfer), **band generalization shown** (3.5 GHz and genuine 28 GHz mmWave). Positioned against published prior art (malicious-RIS destructive beamforming, adversarial attacks on RIS-assisted DL).
+`rt_trace_ris.py` runs in a separate Python 3.11 environment with `sionna-rt`; the
+published channels used sionna-rt 2.x with diffraction on a GPU with a recent driver
+(see its docstring). Its output `artifacts/rt_ris_channels.npz` (~430 MB) is not
+committed; rerun the script to regenerate it before `stage_raytraced.py`.
+
+## Headline results (ASU campus, 3.5 GHz, N=64, 64-beam DFT codebook)
+Partial-measurement victim: L=16 wide-beam RSRPs, top-3 refinement (19 measurements).
+
+| Condition | Top-1 | SE ratio after top-3 |
+|---|---|---|
+| No RIS | 52.0 ± 0.4% | 93.1 ± 0.2% |
+| Random RIS (M=128) | 50.8 ± 0.3% | 92.7 ± 0.1% |
+| Malicious RIS, 0 dB (M=64) | 26.9 ± 0.3% | 76.1 ± 1.0% |
+| Malicious RIS, +6 dB (M=128) | 19.0 ± 0.7% | 67.0 ± 1.0% |
+| Model-free local sweep (20 meas.), no RIS / 0 dB / +6 dB | n/a | 87.5 / 81.1 / 74.4% |
+
+## Limitations (as stated in the paper)
+- The main results use a geometric RIS cascade on ray-traced direct channels; the
+  ray-traced RIS study covers one scene and one RIS position.
+- With physical path loss at sub-6 GHz, the attack is local to users near a meter-scale
+  surface.
+- The attacker needs fresh per-user CSI (semi-active RIS or compromised controller), and
+  a user-specific configuration targets one user or group per SSB burst.
+
+## Conference-version scripts
+`stage1_train.py` ... `stage5_figures.py`, `attacks.py`, `stage_blackbox.py`,
+`stage_mmwave.py`, `stage_universal*.py`, `stage_review_*.py`, `stage_cnn.py`,
+`stage_detector_adaptive.py`, `stage_snr_sweep.py` and related figure scripts reproduce
+the earlier workshop submission (full-CSI victim). The journal results above supersede
+them; note that the SNR-jamming baseline in that version was affected by an optimizer
+scaling error fixed in `ris.ris_snr_jam`.
