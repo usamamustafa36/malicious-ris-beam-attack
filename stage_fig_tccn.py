@@ -32,7 +32,7 @@ if have("stage_ci.json"):
     g = lambda d, cond, m: fmt((d[cond][m]["mean"], d[cond][m]["ci95"]))
     rows = [
         r"\begin{table*}[t]\centering",
-        r"\caption{Headline results (mean $\pm$ 95\% CI over 5 trials, each averaged over 5 noise realizations). Partial-measurement victim: $L{=}16$ wide-beam RSRPs; $\eta_3$ is the SE ratio after the BS measures the DNN's top-3 narrow beams ($19$ measurements in total). The model-free local sweep measures the $4$ narrow beams under the strongest wide beam ($20$ measurements). Full-CSI victim: model-free argmax on the same noisy CSI.}",
+        r"\caption{Headline results (mean $\pm$ 95\% CI over 5 trials, each averaged over 5 noise realizations). Partial-measurement victim: $L{=}16$ wide-beam RSRPs; $\eta_3$ is the SE ratio after the BS measures the DNN's top-3 narrow beams ($19$ measurements in total). The model-free local sweep measures the $4$ narrow beams under the strongest wide beam ($20$ measurements), so its top-1 already includes refinement and compares with the DNN's top-3 and $\eta_3$ rather than its top-1. Full-CSI victim: model-free argmax on the same noisy CSI.}",
         r"\label{tab:main}",
         r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{l cccc cc}\toprule",
