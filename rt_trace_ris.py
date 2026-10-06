@@ -2,7 +2,9 @@
 
 Runs in a separate Python>=3.11 environment (it is not imported by the other stages):
     uv venv -p 3.11 sionna_env && VIRTUAL_ENV=sionna_env uv pip install sionna-rt==1.1.0
-(sionna-rt 2.x needs a newer NVIDIA driver/OptiX than 550; 1.1.0 has no diffraction). In the Munich scene at 3.5 GHz it ray-traces
+(sionna-rt 2.x needs a newer NVIDIA driver/OptiX than 550; 1.1.0 has no diffraction).
+The published channels were traced with sionna-rt 2.x and RT_DIFFRACTION=1 on a Kaggle
+T4 GPU (driver 580); the CUDA variant is used by default, RT_VARIANT selects another. In the Munich scene at 3.5 GHz it ray-traces
   * h_d  : BS (64-element ULA) -> users                      (direct channel)
   * G    : BS (64-element ULA) -> each RIS element           (N x M, exact per element)
   * r    : RIS (planar array)  -> users                      (U x M)
