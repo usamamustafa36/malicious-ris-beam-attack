@@ -27,14 +27,17 @@ from sionna.rt.antenna_pattern import register_antenna_pattern, PolarizedAntenna
 
 FREQ = 3.5e9
 LAM = 299792458.0 / FREQ
-BS_POS = np.array([8.5, 21.0, 27.0])
-RIS_AIM = np.array([70.4, 21.0, 10.0])      # facade point in LoS of the BS (found by ray casting)
+_vec = lambda k, d: np.array([float(x) for x in os.environ.get(k, d).split(",")])
+SCENE = os.environ.get("RT_SCENE", "munich")
+BS_POS = _vec("RT_BS", "8.5,21.0,27.0")          # rooftop BS
+RIS_AIM = _vec("RT_RIS_AIM", "70.4,21.0,10.0")   # facade point in LoS of the BS (found by ray casting)
 RIS_ROWS = RIS_COLS = int(os.environ.get("RT_RIS_SIDE", "64"))
 ZETA_DB = -1.0
 USER_RADIUS, USER_STEP, USER_H = 150.0, 1.0, 1.5
 BATCH = 4000
 DIFFRACTION = os.environ.get("RT_DIFFRACTION", "0") == "1"
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "artifacts", "rt_ris_channels.npz")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "artifacts",
+                   os.environ.get("RT_OUT", "rt_ris_channels.npz"))
 
 
 def v_riscos_pattern(theta, phi):
@@ -62,7 +65,7 @@ def narrowband(paths):
 
 
 def main():
-    sc = load_scene(rt.scene.munich)
+    sc = load_scene(getattr(rt.scene, SCENE))
     sc.frequency = FREQ
     ms = sc.mi_scene
     # RIS centre and normal from the facade hit
@@ -118,7 +121,7 @@ def main():
         print(f"  users {i+len(u)}/{len(users)}  {time.time()-t0:.0f}s", flush=True)
     Hd, R = np.concatenate(Hd), np.concatenate(R)
     pos_el = np.array(ris_array.normalized_positions).T          # (M, 3) in wavelengths (local frame)
-    np.savez_compressed(OUT, H_d=Hd.astype(np.complex64), R=R.astype(np.complex64), G=G.astype(np.complex64),
+    np.savez_compressed(OUT, scene=SCENE, H_d=Hd.astype(np.complex64), R=R.astype(np.complex64), G=G.astype(np.complex64),
                         users=users, bs_pos=BS_POS, ris_pos=ris_pos, ris_normal=nrm, el_pos=pos_el,
                         freq=FREQ, zeta_db=ZETA_DB, elem_gain=np.pi, rows=RIS_ROWS, cols=RIS_COLS)
     print("saved", OUT, f"{time.time()-t0:.0f}s")

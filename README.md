@@ -25,8 +25,9 @@ figures to `figures/`.
 | Fig. 4 | `stage_amortized.py`, `stage_latency_gen.py` | Amortized generator attack (white-/black-box), latency, stale attacker CSI |
 | Table VI | `stage_rsrp_generality.py` | Phase resolution, pilot SNR, 28 GHz, RIS-adversarial training |
 | Fig. 5 | `stage_multipath.py` | Rank-(P+1) multipath BS-RIS channels |
-| Table VII | `rt_trace_ris.py`, `stage_raytraced.py` | Fully ray-traced RIS (Sionna RT, Munich, with diffraction) at fixed and physical power ratios |
-| Table VIII | `stage_detector_rsrp.py` | Detector-aware attack on the partial-measurement victim, incl. one arms-race round |
+| Tables VII, VIII | `rt_trace_ris.py`, `stage_raytraced.py`, `stage_scenes_summary.py` | Fully ray-traced RIS (Sionna RT with diffraction): five placements in Munich, Paris (Etoile) and Florence, at fixed and physical power ratios |
+| Sec. V-E | `rt_ratio_samples.py`, `stage_ratio_weighted.py` | Attack under the realistic mix of per-user power ratios from the ray-traced placements |
+| Table IX | `stage_detector_rsrp.py` | Detector-aware attack on the partial-measurement victim, incl. one arms-race round |
 | Table III | `stage_linkbudget.py` | Link budgets behind the RIS-to-direct power ratios |
 | Figures/tables | `stage_fig_tccn.py` | Regenerates the journal figures and Table IV |
 
@@ -36,8 +37,10 @@ settings, generic attack, noise-averaged evaluation, CIs).
 
 `rt_trace_ris.py` runs in a separate Python 3.11 environment with `sionna-rt`; the
 published channels used sionna-rt 2.x with diffraction on a GPU with a recent driver
-(see its docstring). Its output `artifacts/rt_ris_channels.npz` (~430 MB) is not
-committed; rerun the script to regenerate it before `stage_raytraced.py`.
+(see its docstring). Placements are set with `RT_SCENE`, `RT_BS`, `RT_RIS_AIM`, `RT_OUT`;
+the Munich A default writes `artifacts/rt_ris_channels.npz`. The channel files (0.1-0.7 GB
+each) are not committed; rerun the script to regenerate them, then run `stage_raytraced.py`
+with `RT_FILE`/`RT_JSON`.
 
 ## Headline results (ASU campus, 3.5 GHz, N=64, 64-beam DFT codebook)
 Partial-measurement victim: L=16 wide-beam RSRPs, top-3 refinement (19 measurements).
@@ -52,7 +55,7 @@ Partial-measurement victim: L=16 wide-beam RSRPs, top-3 refinement (19 measureme
 
 ## Limitations (as stated in the paper)
 - The main results use a geometric RIS cascade on ray-traced direct channels; the
-  ray-traced RIS study covers one scene and one RIS position.
+  ray-traced RIS study covers five placements in three cities.
 - With physical path loss at sub-6 GHz, the attack is local to users near a meter-scale
   surface.
 - The attacker needs fresh per-user CSI (semi-active RIS or compromised controller), and

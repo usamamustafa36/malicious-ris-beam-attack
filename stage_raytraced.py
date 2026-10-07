@@ -27,10 +27,11 @@ SEEDS = [42, 7, 2024]
 NORM_SIDE, NORM_TARGETS = 32, [0.0, 6.0]
 PHYS_SIDES = [16, 32, 64]
 BINS = [(-np.inf, -20), (-20, -10), (-10, 0), (0, np.inf)]
+OUT_JSON = os.environ.get("RT_JSON", "stage_raytraced.json")
 
 
 def load():
-    z = np.load(os.path.join(bd.ART, "rt_ris_channels.npz"))
+    z = np.load(os.path.join(bd.ART, os.environ.get("RT_FILE", "rt_ris_channels.npz")))
     Hd, R, G = z["H_d"], z["R"], z["G"]
     keep = np.linalg.norm(Hd, axis=1) > 0
     s = 1.0 / np.median(np.linalg.norm(Hd[keep], axis=1))          # global rescale, physics-neutral
@@ -129,8 +130,8 @@ def main():
             rows.append(r)
         keys = [k for k in rows[0] if all(rr.get(k) is not None for rr in rows)]
         out["results"][kind] = {k: {m: rc.ci95([rr[k][m] for rr in rows]) for m in rows[0][k]} for k in keys}
-        json.dump(out, open(os.path.join(bd.ART, "stage_raytraced.json"), "w"), indent=2)
-    print("Saved stage_raytraced.json")
+        json.dump(out, open(os.path.join(bd.ART, OUT_JSON), "w"), indent=2)
+    print("Saved", OUT_JSON)
 
 
 if __name__ == "__main__":

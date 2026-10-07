@@ -1,0 +1,13 @@
+\begin{table*}[t]\centering
+\caption{Ray-traced RIS placements (Sionna RT with diffraction, $3.5$\,GHz, $64{\times}64$ RIS of $2.74$\,m; 3 trials). Users: test users the RIS reaches. Ratio: median achievable RIS-to-direct ratio and share of users at $\ge0$\,dB. Partial-measurement victim: top-1 / $\eta_3$ / sweep $\eta$ (\%) without RIS, under the attack at a fixed $+6$\,dB ratio, and with physical path loss under a random RIS (top-1) and the attack. Full-CSI victim at $+6$\,dB: DNN / argmax top-1 (\%).}
+\label{tab:scenes}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccccc}\toprule
+Placement & Users & Ratio (dB / $\ge0$) & No RIS & Fixed $+6$\,dB & Physical, random & Physical, attack & Full CSI $+6$\,dB\\\midrule
+Munich A & 2388 & $-2.9$ / 13\% & 78.8 / 99.8 / 89.9 & 34.4 / 82.0 / 83.3 & 77.4 & 62.0 / 94.0 / 88.1 & 4.7 / 98.8\\
+Munich B & 2819 & $-0.3$ / 41\% & 77.6 / 99.9 / 92.3 & 28.7 / 76.8 / 97.0 & 75.2 & 50.0 / 93.4 / 92.5 & 10.9 / 98.0\\
+Etoile A & 1903 & $+42.0$ / 59\% & 88.3 / 99.7 / 94.6 & 38.0 / 90.6 / 81.7 & 63.2 & 30.6 / 67.5 / 80.0 & 4.5 / 98.3\\
+Etoile B & 3920 & $-0.2$ / 47\% & 79.8 / 99.9 / 92.8 & 31.8 / 84.9 / 85.7 & 68.5 & 44.4 / 85.1 / 85.6 & 6.5 / 96.6\\
+Florence & 1377 & $-3.4$ / 15\% & 76.0 / 99.8 / 91.0 & 24.3 / 70.8 / 93.7 & 75.8 & 53.1 / 93.5 / 90.9 & 13.1 / 99.1\\
+\bottomrule\end{tabular}}
+\end{table*}
