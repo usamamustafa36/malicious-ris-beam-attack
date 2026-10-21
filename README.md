@@ -5,8 +5,8 @@ Surfaces as Physical Adversaries of Learned Beam Management"* (submitted to IEEE
 Transactions on Cognitive Communications and Networking).
 
 A malicious reconfigurable intelligent surface (RIS), which transmits nothing, chooses its
-phases so that a learned beam predictor selects a wrong narrow beam while the channel's
-capacity is preserved. The perturbation is restricted to what unit-modulus (and few-bit)
+phases so that a learned beam predictor selects a wrong narrow beam while the best-beam
+rate remains. The perturbation is restricted to what unit-modulus (and few-bit)
 reflection can produce. All results are simulations on ray-traced channels; no
 over-the-air experiment is claimed.
 
@@ -28,6 +28,9 @@ figures to `figures/`.
 | Tables VII, VIII | `rt_trace_ris.py`, `stage_raytraced.py`, `stage_scenes_summary.py` | Fully ray-traced RIS (Sionna RT with diffraction): five placements in Munich, Paris (Etoile) and Florence, at fixed and physical power ratios |
 | Sec. V-E | `rt_ratio_samples.py`, `stage_ratio_weighted.py` | Attack under the realistic mix of per-user power ratios from the ray-traced placements |
 | Table IX | `stage_detector_rsrp.py` | Detector-aware attack on the partial-measurement victim, incl. one arms-race round |
+| Table X | `stage_structdef.py` | Structural checks that do not train on the attack: top-3, union with the local beams, random probes, and a defense-aware attacker |
+| Rank-one decision rule | `stage_rule.py`, `stage_rule_extra.py` | Wide-beam flip and DNN decision thresholds on the rank-one cascade; `stage_rule_extra.py` repeats the DNN threshold on two more victims and does not overwrite `stage_rule.json` |
+| Uplink sensing | `stage_sensing.py` | Equal-power attack when per-user CSI comes from a few contiguous sensing elements and a stale direct-channel estimate |
 | Table III | `stage_linkbudget.py` | Link budgets behind the RIS-to-direct power ratios |
 | Figures/tables | `stage_fig_tccn.py` | Regenerates the journal figures and Table IV |
 
