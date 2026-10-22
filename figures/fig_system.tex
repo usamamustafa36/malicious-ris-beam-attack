@@ -1,29 +1,43 @@
-% System and threat model (TikZ). Included by paper/main_tccn.tex.
-% Boxes are placed edge to edge so the pipeline cannot overlap inside one column.
-\usetikzlibrary{positioning}
+% System and threat model. Natural size for one IEEE column (252 pt); text is not scaled.
+\usetikzlibrary{positioning,calc}
 \begin{tikzpicture}[font=\footnotesize, >=latex,
-  box/.style={draw, rounded corners=2pt, align=center, inner sep=2pt, fill=white, font=\scriptsize},
-  bad/.style={draw=red!70!black, very thick, fill=red!6, rounded corners=2pt, align=center, inner sep=2pt, font=\scriptsize},
-  lab/.style={align=center, inner sep=1pt, font=\scriptsize}]
-  \node[box, minimum width=1.15cm, minimum height=0.82cm] (bs) at (0,0) {BS\\$N$-ULA};
-  \node[box, minimum width=0.85cm, minimum height=0.55cm] (ue) at (6.05,0) {UE};
-  \node[bad, minimum width=1.85cm] (ris) at (3.0,1.48) {malicious RIS\\$M$ elements, $\mathbf v$};
-  \draw[pattern=north east lines, pattern color=gray!70, draw=gray] (2.78,-0.26) rectangle (3.18,0.26);
-  \node[lab, gray] at (2.98,-0.48) {blockage $L_b$};
-  \draw[->, thick] (bs.east) -- node[above, pos=0.28] {$\mathbf h_d$} (ue.west);
-  \draw[->, thick, red!70!black] (bs.north east) -- node[above left, pos=0.55] {$\mathbf a_{\mathrm{bR}}$} (ris.south west);
-  \draw[->, thick, red!70!black] (ris.south east) -- node[above right, pos=0.45] {$\mathbf k_u$} (ue.north west);
-  \node[lab, red!70!black, anchor=south] (csi) at (4.7,2.22) {overhears pilots\\(per-user CSI)};
-  \draw[->, dashed, red!70!black] (csi.south) -- (ris.north east);
-  \node[box, text width=1.38cm] (meas) at (0,-1.58) {$L$ wide-beam\\RSRPs};
-  \node[box, text width=1.42cm, right=3.6mm of meas] (dnn) {DNN $f_\theta$\\predictor};
-  \node[box, text width=1.38cm, right=3.6mm of dnn] (ref) {top-$k$\\refinement};
-  \node[box, text width=1.28cm, right=3.6mm of ref] (out) {serving\\beam $\hat{b}$};
+  box/.style={draw, rounded corners=1.5pt, align=center, inner sep=1.5pt,
+              fill=white, font=\footnotesize},
+  bad/.style={draw=red!70!black, line width=0.6pt, fill=red!6,
+              rounded corners=1.5pt, align=center, inner sep=1.5pt,
+              font=\footnotesize, text width=22mm},
+  lab/.style={align=center, inner sep=0.4pt, font=\footnotesize}]
+  \node[box, text width=16.4mm, minimum height=9.6mm, anchor=north west] (meas) at (0,0)
+    {$L$ wide-beam\\RSRPs};
+  \node[box, text width=15.6mm, minimum height=9.6mm, right=1.4mm of meas] (dnn)
+    {DNN $f_\theta$\\predictor};
+  \node[box, text width=14.8mm, minimum height=9.6mm, right=1.4mm of dnn] (ref)
+    {top-$k$\\refinement};
+  \node[box, text width=15.4mm, minimum height=10.6mm, right=1.4mm of ref] (out)
+    {serving\\beam $\hat{b}$};
   \draw[->] (meas) -- (dnn);
   \draw[->] (dnn) -- (ref);
   \draw[->] (ref) -- (out);
+  \node[box, minimum width=13mm, minimum height=8.8mm, anchor=south] (bs)
+    at ($(meas.north)+(0,8.5mm)$) {BS\\$N$-ULA};
+  \node[box, minimum width=11mm, minimum height=8.8mm, anchor=south] (ue)
+    at ($(out.north)+(0,8.5mm)$) {UE};
   \draw[->, gray] (bs.south) -- (meas.north);
-  \path (meas.south west) -- (out.south east)
-    node[midway, below=1.6mm, red!70!black, font=\scriptsize]
+  \path (bs.east) -- (ue.west) coordinate[midway] (mid);
+  \node[bad, minimum height=8.6mm, anchor=south] (ris) at ($(mid)+(0,7.2mm)$)
+    {malicious RIS\\$M$ elements, $\mathbf v$};
+  \draw[->, thick] (bs.east) -- node[above=0.4pt, inner sep=1pt] {$\mathbf h_d$} (ue.west);
+  \draw[pattern=north east lines, pattern color=gray!65, draw=gray!70]
+    ($(mid)+(-2.4mm,-3.3mm)$) rectangle ($(mid)+(2.4mm,-1.5mm)$);
+  \node[lab, gray!80!black, anchor=north] at ($(mid)+(0,-3.8mm)$) {blockage $L_b$};
+  \draw[->, thick, red!70!black] (bs.60) --
+    node[above left, inner sep=1.2pt, pos=0.45] {$\mathbf a_{\mathrm{bR}}$} (ris.south west);
+  \draw[->, thick, red!70!black] (ris.south east) --
+    node[above, inner sep=1.2pt, pos=0.55] {$\mathbf k_u$} (ue.120);
+  \node[lab, red!70!black, anchor=south west] (csi)
+    at ($(ris.north east)+(1.2mm,3.2mm)$) {overhears pilots\\(per-user CSI)};
+  \draw[->, dashed, red!70!black] (csi.south west) -- (ris.north east);
+  \node[red!70!black, font=\footnotesize, align=center, anchor=north, text width=64mm]
+    at ($(meas.south)!0.5!(out.south)+(0,-1.5mm)$)
     {RIS phases are crafted to make $f_\theta$ mispredict};
 \end{tikzpicture}

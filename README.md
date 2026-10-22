@@ -31,6 +31,10 @@ figures to `figures/`.
 | Table X | `stage_structdef.py` | Structural checks that do not train on the attack: top-3, union with the local beams, random probes, and a defense-aware attacker |
 | Rank-one decision rule | `stage_rule.py`, `stage_rule_extra.py` | Wide-beam flip and DNN decision thresholds on the rank-one cascade; `stage_rule_extra.py` repeats the DNN threshold on two more victims and does not overwrite `stage_rule.json` |
 | Uplink sensing | `stage_sensing.py` | Equal-power attack when per-user CSI comes from a few contiguous sensing elements and a stale direct-channel estimate |
+| Sensing impairments | `stage_sensing_impair.py` | Same four-element, 20 dB chain with neighbor coupling, 3-bit I/Q, a 20° calibration draw, and sine offsets 0.02 and 0.05. Does not overwrite `stage_sensing.json` |
+| Second predictors | `stage_arch2.py` | 1-D convolutional network, white-box, and a gradient-boosted tree scored on phases computed for the perceptron |
+| Sector cover | `stage_restore.py` | Model-free cover of the w strongest wide beams; the aware attacker minimizes that served gain |
+| Spherical hop | `stage_spherical.py` | Munich dominated users with the traced RIS-to-user phase replaced by the spherical phase of the same direction |
 | Table III | `stage_linkbudget.py` | Link budgets behind the RIS-to-direct power ratios |
 | Figures/tables | `stage_fig_tccn.py` | Regenerates the journal figures and Table IV |
 
@@ -63,6 +67,14 @@ Partial-measurement victim: L=16 wide-beam RSRPs, top-3 refinement (19 measureme
   surface.
 - The attacker needs fresh per-user CSI (semi-active RIS or compromised controller), and
   a user-specific configuration targets one user or group per SSB burst.
+- On the rogue sensing route, neighbor coupling of 0.3 or a sine offset of 0.02 removes
+  most of the four-element attack. A single 20° calibration draw is not stable across
+  seeds. The 0–5 ms delay does not move the fitted angle.
+- The sector cover returns the served rate at 32 measurements and leaves the exact beam
+  short of that rule's clean optimality. Certified training is not evaluated.
+- The traced RIS-to-user hop is a plane wave. Replacing it with the spherical phase of
+  the same direction leaves the Munich dominated-user drop unchanged. Diffuse scattering
+  is omitted, and no over-the-air measurement is reported.
 
 ## Conference-version scripts
 `stage1_train.py` ... `stage5_figures.py`, `attacks.py`, `stage_blackbox.py`,
